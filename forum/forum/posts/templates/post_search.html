@@ -3,9 +3,12 @@
 
 {% block content %}
 
+<form method="GET">
+    {{ filter.form }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+    <input type="submit" value="Найти">
+</form>
 
-
-                    {% for post in posts %}
+                    {% for post in filter.qs %}
                     <hr class="my-4" />
                     <div class="post-preview">
                         <a href="{% url 'post_detail' post.id %}">
