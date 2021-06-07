@@ -19,7 +19,7 @@ class CommentForm(ModelForm):
     class Meta:
         
         model = Comment
-        fields = ['title_comment',  'comment_text',  'comment_post' ]
+        fields = [  'comment_text' ]
 
 
     

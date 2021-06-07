@@ -29,12 +29,11 @@ class PostDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         id = self.kwargs.get('pk')
-        print(id)
-        post_data = Post.objects.get(id = id)
-        postCat = Post.objects.get(pk=id)
+ 
+
         post_comments = Comment.objects.filter(comment_post = Post.objects.get(id = id))
         
-        comments = Comment.objects.all()
+  
         context['comments'] = post_comments  
 
         return context
@@ -80,3 +79,9 @@ class PostSearch(ListView):
         context = super().get_context_data(**kwargs)
         context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
         return context
+
+class ContactDetailView(ListView):
+    model = Post
+    template_name = 'forum_contact.html'
+    context_object_name = 'post'
+    queryset = Post.objects.all()  
