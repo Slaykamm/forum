@@ -1,0 +1,39 @@
+{% extends 'default.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+                    {% for post in filter.qs %}
+                    <hr class="my-4" />
+                    <div class="post-preview">
+                        <a href="{% url 'post_detail' post.id %}">
+                            <h2 class="post-title"> {{post.post_title}} </h2>
+                            <h3 class="post-subtitle"> {{ post.post_text|truncatewords:2  }} </h3>
+                            
+                        </a>
+
+                        <p class="post-meta">
+                            Опубликовано: {{ post.author_post }}
+                            
+                            {{post.post_date|date:'d M Y'}}
+                        </p>
+                    </div>
+                    {% endfor %}
+                   
+                    <!-- Divider-->
+                    <hr class="my-4" />
+                    <!-- Pager-->
+                    <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="#!">Older Posts →</a></div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer-->
+        <form method="GET">
+            {{ filter.form }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+            <input type="submit" value="Найти">
+        </form>
+        {% endblock content %}
+
+
