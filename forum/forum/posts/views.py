@@ -1,7 +1,5 @@
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView  
 from .models import Category, Post, Comment
-
-
 from .filters import PostFilter  
 from .forms import PostForm, CommentForm
   
@@ -15,8 +13,10 @@ class PostsList(ListView):
 
     def get_context_data(self, **kwargs):  # забираем отфильтрованные объекты переопределяя метод get_context_data у наследуемого класса (привет, полиморфизм, мы скучали!!!)
         context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
         return context
+
 
 
 
@@ -28,14 +28,10 @@ class PostDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         id = self.kwargs.get('pk')
- 
-
         post_comments = Comment.objects.filter(comment_post = Post.objects.get(id = id))
-        
-
         context['comments'] = post_comments  
-
         return context
 
 
@@ -44,9 +40,20 @@ class PostCreateView(CreateView):
     form_class = PostForm
 
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
+
+
 class PostUpdateView(UpdateView):
     template_name = 'post_create.html'
     form_class = PostForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
 
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
@@ -57,13 +64,23 @@ class PostDeleteView(DeleteView):
     queryset = Post.objects.all()
     success_url = '/posts/'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
+
 class CommentCreateView(UpdateView):
     template_name = 'comment_create.html'
     form_class = CommentForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
+
+
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
-
         return Comment.objects.create(comment_post = Post.objects.get(id = id))
         
 
@@ -77,11 +94,21 @@ class PostSearch(ListView):
 
     def get_context_data(self, **kwargs):  # забираем отфильтрованные объекты переопределяя метод get_context_data у наследуемого класса (привет, полиморфизм, мы скучали!!!)
         context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
         return context
+
+
 
 class ContactDetailView(ListView):
     model = Post
     template_name = 'forum_contact.html'
     context_object_name = 'post'
     queryset = Post.objects.all()  
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context

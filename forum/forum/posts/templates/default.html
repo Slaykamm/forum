@@ -33,6 +33,12 @@
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/create/">Добавить сообщение</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/search/">Поиск сообщений</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/contact/">Контакты</a></li>
+                        {% if not logged_user %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/accounts/login/">Логин</a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/posts/contact/">{{logged_user}} </a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/sign/logout/">Логаут</a></li>
                     </ul>
                 </div>
             </div>
