@@ -33,7 +33,7 @@ class PostDetail(DetailView):
 
         post_comments = Comment.objects.filter(comment_post = Post.objects.get(id = id))
         
-  
+
         context['comments'] = post_comments  
 
         return context
