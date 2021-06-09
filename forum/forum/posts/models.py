@@ -48,9 +48,9 @@ class Post(models.Model):
 class Comment(models.Model):
     title_comment = models.CharField(max_length=64, blank=True, default='')
     comment_text = models.TextField(default='')
-    comment_post = models.ForeignKey(Post, on_delete=models.CASCADE, default='5')
-    #author_comment = models.ForeignKey(Author, on_delete=models.CASCADE)  в будущем доделать модель чтобы автор поста был
-    
+    comment_post = models.ForeignKey(Post, on_delete=models.CASCADE, default='2')
+    comment_date = models.DateField(auto_now_add = True)
+    author_comment = models.ForeignKey(Author, on_delete=models.CASCADE, default='1')     
 
     def __str__(self):
         return f'{self.comment_text}'

@@ -9,6 +9,7 @@
 
 
                     <h2 class="section-heading">{{post.post_title}}</h2>
+                    
                         <p> {{ post.post_text }}</p>
                         
                         <blockquote class="blockquote">Автор: {{ post.author_post }}, Дата: {{post.post_date|date:'d M Y'}}</blockquote>
@@ -24,11 +25,16 @@
                             <p><h3><strong>Комментарии: </strong></h3></p>
                                 
                             
-                                {% for com in comments %}
-                                    {% if com %}
-                            <p>         {{ com.comment_text }} </p>
-                                
-                 <!--      <blockquote class="blockquote"> <strong> {{ com }} </strong> </blockquote> </p> --> 
+                            {% for com in comments %}
+                                    
+                            <p>      <h5>   {{ com.comment_text }} 
+                                <p> </p>
+                            </h5> <a href="{% url 'update_comment' com.id %}"><h7><u>Редактировать</h7> 
+                                                               <a href="{% url 'delete_comment' com.id %}">Удалить</u></a></p>
+                                    {% if com.comment_text %}
+                                    
+
+                                    <blockquote class="blockquote">Автор: {{ com.author_comment }}, Дата: {{com.comment_date|date:'d M Y'}} </blockquote> </p>  
                             
                                     <hr style="border: 0,5px solid rgb(0, 0, 0);">
                                 {% endif %}

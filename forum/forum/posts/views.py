@@ -1,7 +1,12 @@
+from django.contrib.auth.models import User
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView  
-from .models import Category, Post, Comment
+from .models import Category, Post, Comment, Author
 from .filters import PostFilter  
 from .forms import PostForm, CommentForm
+#from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
   
  
 class PostsList(ListView):
@@ -20,6 +25,7 @@ class PostsList(ListView):
 
 
 
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class PostDetail(DetailView):
     model = Post
     template_name = 'post_detail.html'
@@ -34,18 +40,17 @@ class PostDetail(DetailView):
         context['comments'] = post_comments  
         return context
 
-
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class PostCreateView(CreateView):
     template_name = 'post_create.html'
     form_class = PostForm
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         return context
 
 
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class PostUpdateView(UpdateView):
     template_name = 'post_create.html'
     form_class = PostForm
@@ -59,6 +64,8 @@ class PostUpdateView(UpdateView):
         id = self.kwargs.get('pk')
         return Post.objects.get(pk=id)
 
+
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class PostDeleteView(DeleteView):
     template_name = 'post_delete.html'
     queryset = Post.objects.all()
@@ -69,6 +76,8 @@ class PostDeleteView(DeleteView):
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         return context
 
+
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class CommentCreateView(UpdateView):
     template_name = 'comment_create.html'
     form_class = CommentForm
@@ -81,8 +90,41 @@ class CommentCreateView(UpdateView):
 
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
-        return Comment.objects.create(comment_post = Post.objects.get(id = id))
+
+        return Comment.objects.create(comment_post = Post.objects.get(id = id), author_comment = Author.objects.get(author_user = self.request.user))
+
+
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
+class CommentUpdateView(UpdateView):
+    template_name = 'comment_create.html'
+    form_class = CommentForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
+
+    def get_object(self, **kwargs):
+        id = self.kwargs.get('pk')
+        print('id', id, Comment.objects.get(pk=id))
+        return Comment.objects.get(pk=id)
+
         
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
+class CommentDeleteView(DeleteView):
+    template_name = 'post_delete.html'
+    queryset = Comment.objects.all()
+    success_url = '/posts/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        return context
+
+
+
+
+
 
  
 class PostSearch(ListView):
