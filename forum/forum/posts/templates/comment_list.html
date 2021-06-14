@@ -1,0 +1,84 @@
+{% extends 'default.html' %}
+{% load static %}
+
+{% block content %}
+{% if filter.qs %}
+
+        <!-- Post Content-->
+        <hr class="my-4" />
+            <div class="post-preview">
+                <form method="GET">
+                    {{ filter.form }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+                    <input type="submit" value="Найти">
+                </form>
+
+                   
+                        <p> Ниже Комментарии по Вашим постам: </p>
+                        
+                       
+                        <p> <table>
+                            <thead>
+                                <th>
+                                    <p style="text-align: center;"><strong> Дата комментария</strong></p>
+                                </th>
+                                <th>
+                                    <p style="text-align: center;"><strong> Тема сообщения</strong></p>
+                                </th>
+                                <th>
+                                    <p style="text-align: center;"><strong>Текст комментария</strong></p>
+                                </th>
+                                <th>
+                                    <p style="text-align: center;"><strong>Автор комментария</strong></p>
+                                </th>
+                                <th>
+                                    <p style="text-align: center;"><strong>Что делаем?</strong></p>
+                                </th>
+
+                                </thead>
+
+
+                        {% for com in filter.qs %} 
+
+                                  
+                        </p>
+                      <td>
+                            <p style="text-align: center;">{{ com.comment_date|date:'d M Y'}} </p>
+                        </td>
+                        <td>
+                            <p style="text-align: center;">{{ com.comment_post|truncatewords:4}} </p>
+                        </td>
+                        <td>
+                            <p style="text-align: center;">{{ com.comment_text|truncatewords:3}} </p>
+                        </td>
+                        <td>
+                            <p style="text-align: center;">{{ com.author_comment }}</p>
+                        </td>
+                        <td>
+                           <!-- <a href="{% url 'update_comment' com.id %}"><u>Редактировать  -->
+                            <a href="{% url 'feedback_comment' com.id %}"><u>Отклик / </a>  
+                           <a href="{% url 'delete_comment' com.id %}"><u>Удалить</u></a></p>                               
+                        </td>        
+
+                     
+                    </tr>
+                        {% endfor %}       
+                                
+  
+                    </table> 
+
+                
+            </div>
+ 
+ 
+
+            </article>
+
+        {% else %}
+
+        <p> <h3> К сожалению, пока нет комментариев на Ваши сообщения. </h3></p>
+
+        {% endif %}
+        {% endblock content %}
+
+
+

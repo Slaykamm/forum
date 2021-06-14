@@ -1,12 +1,19 @@
 from django.contrib.auth.models import User
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView  
 from .models import Category, Post, Comment, Author
-from .filters import PostFilter  
+from .filters import CommentFilter,  PostFilter 
 from .forms import PostForm, CommentForm
 #from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.core.paginator import Paginator  
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives # импортируем класс для создание объекта письма с html
+
   
  
 class PostsList(ListView):
@@ -15,11 +22,24 @@ class PostsList(ListView):
                                     #в котором будут все инструкции о том, как именно пользователю должны вывестись наши объекты
     context_object_name = 'posts'
     queryset = Post.objects.order_by('-post_date')
+    paginate_by = 3 
+
 
     def get_context_data(self, **kwargs):  # забираем отфильтрованные объекты переопределяя метод get_context_data у наследуемого класса (привет, полиморфизм, мы скучали!!!)
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
-        context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
+        #context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
+
+
+
+        if self.request.user.is_authenticated: 
+            author = Author.objects.filter(author_user = self.request.user).exists() #делаем всех авторами, как просят в ТЗ
+
+            if not author:
+                Author.objects.create(author_user=self.request.user)
+
+
+
         return context
 
 
@@ -38,6 +58,14 @@ class PostDetail(DetailView):
         id = self.kwargs.get('pk')
         post_comments = Comment.objects.filter(comment_post = Post.objects.get(id = id))
         context['comments'] = post_comments  
+
+        author_flag = False   #это и ниже это чтбы кнопки редактировать и удалять горели только у автора сообщения
+        com_author = Post.objects.get(id = id).author_post
+        actual_user = self.request.user       
+        if str(com_author) == str(actual_user):
+            author_flag = True
+        context['author_flag'] = author_flag
+
         return context
 
 @method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
@@ -47,8 +75,14 @@ class PostCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+
         return context
 
+    def get_object(self, **kwargs):
+
+        return    Post.objects.create(author_post =  Author.objects.get(author_user = self.request.user))
+
+ 
 
 @method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class PostUpdateView(UpdateView):
@@ -89,7 +123,6 @@ class CommentCreateView(UpdateView):
 
 
     def get_object(self, **kwargs):
-        id = self.kwargs.get('pk')
 
         return Comment.objects.create(comment_post = Post.objects.get(id = id), author_comment = Author.objects.get(author_user = self.request.user))
 
@@ -98,7 +131,6 @@ class CommentCreateView(UpdateView):
 class CommentUpdateView(UpdateView):
     template_name = 'comment_create.html'
     form_class = CommentForm
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
@@ -106,20 +138,39 @@ class CommentUpdateView(UpdateView):
 
     def get_object(self, **kwargs):
         id = self.kwargs.get('pk')
-        print('id', id, Comment.objects.get(pk=id))
+
         return Comment.objects.get(pk=id)
+
+    def form_valid(self, form):
+        id = self.kwargs.get('pk')
+        com_author = Comment.objects.get(id = id).author_comment
+        actual_user = self.request.user
+        print(str(com_author), str(actual_user))
+        if str(com_author) != str(actual_user):
+            return HttpResponseForbidden()
+        return super().form_valid(form)
+
+
+
+
+
 
         
 @method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class CommentDeleteView(DeleteView):
     template_name = 'post_delete.html'
     queryset = Comment.objects.all()
-    success_url = '/posts/'
+    success_url = '/comment_list'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
-        return context
+
+
+
+
+
+
+
+
+
 
 
 
@@ -133,6 +184,7 @@ class PostSearch(ListView):
                                     #в котором будут все инструкции о том, как именно пользователю должны вывестись наши объекты
     context_object_name = 'posts'
     queryset = Post.objects.order_by('-post_date')
+    paginate_by = 5 
 
     def get_context_data(self, **kwargs):  # забираем отфильтрованные объекты переопределяя метод get_context_data у наследуемого класса (привет, полиморфизм, мы скучали!!!)
         context = super().get_context_data(**kwargs)
@@ -154,3 +206,122 @@ class ContactDetailView(ListView):
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         return context
+
+
+
+#обрабатываем страницу с комментариями автора.
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
+class CommentDetailView(ListView):
+    model = Comment
+    template_name = 'comment_list.html'
+    context_object_name = 'author_comment_context'
+    queryset = Comment.objects.order_by('-comment_date')
+ 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
+        id = self.kwargs.get('pk')
+        userAuthorCheck = Author.objects.filter(author_user = self.request.user).exists()
+        if userAuthorCheck:    # работает только если юзер писатель, иначе не возращает ничего
+            post_author = Post.objects.filter(author_post = Author.objects.get(author_user = self.request.user))
+            post_comments = Comment.objects.filter(comment_post__author_post = Author.objects.get(author_user = self.request.user))
+            for post in post_comments:
+                if len(str(post.comment_text)) == 0:
+                    print('AAAA', post.id )
+                    empty = Comment.objects.get(id = post.id)
+                    empty.delete()
+
+            context['comments'] = post_comments  
+            context['filter'] = CommentFilter(self.request.GET, queryset=post_comments)   #self.get_queryset()) 
+
+        return context
+
+@method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
+class CommentFeedbackView(DetailView):
+    
+    model = Comment
+    template_name = 'comment_list.html'  
+    context_object_name = 'feedback_comment'
+    queryset = Comment.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        id = self.kwargs.get('pk')
+        context['logged_user'] = self.request.user.username
+        post_comments = Comment.objects.filter(comment_post__author_post = Author.objects.get(author_user = self.request.user))
+        context['comments'] = post_comments  
+        context['filter'] = CommentFilter(self.request.GET, queryset=post_comments)
+        feedback_comment_author = Comment.objects.get(id = id).author_comment
+        feedback_comment_text = Comment.objects.get(id = id).comment_text
+        feedback_comment_author_email = User.objects.get(username=str(feedback_comment_author)).email
+        post_id = Comment.objects.get(id = id).comment_post.id 
+        post_commented_title = Post.objects.get(id=post_id).post_title
+
+
+        emails_list = [] 
+        emails_list.append(feedback_comment_author_email)
+
+        #if feedback_comment_author_email:
+        html_content = render_to_string( 
+        'email_comment_feedback.html',
+        {
+        'feedback_comment_author': feedback_comment_author, 
+        'feedback_comment_text': feedback_comment_text, 
+        'post_commented_title': post_commented_title, 
+        'id': post_id,
+        
+        }
+
+        )
+
+        msg = EmailMultiAlternatives(
+        subject=f'Благодарим за комментарий ',   
+        
+        body=f'Благодарим за комментарий ', 
+        from_email= 'destpoch55@mail.ru', #'destpoch22@mail.ru',  #'destpoch22@mail.ru'
+        to=  emails_list
+        )
+
+        msg.attach_alternative(html_content, "text/html")
+        
+        #print("вместо отправки извещения на изменение печатаем",  feedback_comment_author, feedback_comment_text, post_commented_title, post_id  )
+        msg.send() # отсылаем
+
+
+        return context
+
+
+
+
+
+
+        # postCat = Post.objects.get(pk=id).post_category.all()
+        # usCat = Category.objects.filter(subscribers= User.objects.get(username=str(user)))
+
+
+        # for cat in postCat:
+        #     if not CategorySubscribers.objects.filter(category = cat, user = self.request.user).exists():   # делаем если подпиччика нет
+        #         CategorySubscribers.objects.create(category = cat, user = self.request.user )
+        #         forEmailCat = cat #получаем категорию, чтобы отправить юзеру по емаил
+        #         context['is_not_subscriber'] = False
+
+        #         html_content = render_to_string( 
+        #         'subscribe_created.html',
+        #         {
+        #         'user': user, 'cat': cat, 'title': emailtitle, 'text':emailarticle, 'art_id':id,
+        #         }
+
+        #         )
+        #         print ('asdas', id)
+        #         msg = EmailMultiAlternatives(
+        #         subject=f'{self.request.user} ',    #кому
+                
+        #         body=f'Вы подписались на категорию {forEmailCat}', 
+        #         from_email='destpoch44@mail.ru',
+        #         to=[f'{userEmail}', ]  
+        #         )
+
+        #         msg.attach_alternative(html_content, "text/html")
+        #         print("печатаем что отправили подписку", 'user', user, 'cat', cat, 'title', emailtitle, 'text',emailarticle, 'art_id',id)
+        #         #msg.send() # отсылаем
+

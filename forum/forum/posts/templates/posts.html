@@ -9,27 +9,66 @@
                     <hr class="my-4" />
                     <div class="post-preview">
                         <a href="{% url 'post_detail' post.id %}">
-                            <h2 class="post-title"> {{post.post_title}} </h2>
-                            <h3 class="post-subtitle"> {{ post.post_text|truncatewords:10  }} </h3>
+                            <h2 class="post-title"> {{post.post_title|safe}} </h2>
+                            {{ post.post_text|safe|truncatewords:10   }}</p>
+                            
                             
                         </a>
-
+                        <p>
+                            <h5> Категория {{ post.category_post|safe }}</h5>
+                        </p>
                         <p class="post-meta">
-                            Опубликовано: {{ post.author_post }}
+                            Опубликовано: {{ post.author_post|safe }}
                             
                             {{post.post_date|date:'d M Y'}}
+                            {% endfor %}
                         </p>
                     </div>
-                    {% endfor %}
+
                    
+                <!-- Проверяем что поддерживается постраничный вывод -->
+                {% if is_paginated %}
+                <div class="d-flex justify-content-end mb-4">
+                <!-- Если доступна предыдущая страница, то даём ссылку на неё и самую первую страницу -->
+                {% if page_obj.has_previous %}
+                <a class="btn btn-primary text-uppercase" href="?page=1">First
+                <a class="btn btn-primary text-uppercase" href="?page={{ page_obj.previous_page_number }}"><<<</a>
+                {% endif %}
+ 
+        
+                <!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <a><h3>{{ num }}</h3></a>
+                         
+                        
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a class="btn btn-primary text-uppercase"  href="?page={{ num }}">{{ num }}</a>
+                    
+                        {% endif %}
+                {% endfor %}
+        
+                <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
+                {% if page_obj.has_next %}
+              <a class="btn btn-primary text-uppercase" href="?page={{ page_obj.next_page_number }}">>>></a>
+                    <a class="btn btn-primary text-uppercase"  href="?page={{ page_obj.paginator.num_pages }}">Last</a> </div>
+                {% endif %}
+        
+                {% endif %}
+
+
+            
+
                     <!-- Divider-->
                     <hr class="my-4" />
                     <!-- Pager-->
-                    <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="#!">Older Posts →</a></div>
+                   
                 </div>
             </div>
         </div>
         <!-- Footer-->
+
+
 
         {% endblock content %}
 

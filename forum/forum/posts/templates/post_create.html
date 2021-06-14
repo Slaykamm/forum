@@ -15,6 +15,7 @@
                 <h2 class="section-heading">Добавить сообщение</h2>
                 <p><form method="POST">
                     {% csrf_token %} 
+                    {{ form.media}}
                     {{ form }} <!-- Теперь нам нужна только готовая форма и кнопка -->
 
                     

@@ -11,7 +11,7 @@
 
 
                 <h2 class="section-heading">Вы действительно хотите удалить сообщение: {{post.post_title}}?</h2>
-                <p>{{ post.post_text }}</p>
+                <p>{{ post.post_text|safe }}</p>
 
                 <a href="#!"><img class="img-fluid" src='{% static "assets/img/2post-sample-image.jpg" %}' alt="..." /></a>
                 <span class="caption text-muted">To go places and do things that hbefore.</p>

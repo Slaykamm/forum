@@ -1,5 +1,5 @@
 from django_filters import FilterSet  # импортируем filterset,
-from .models import Post
+from .models import Comment , Post
 
  
  
@@ -14,3 +14,14 @@ class PostFilter(FilterSet):
             'category_post': ['in'],  # цена должна быть меньше или равна тому, что указал пользователь
         }
 
+
+class CommentFilter(FilterSet):
+    class Meta:
+        model = Comment
+#        fields = ('author_comment',)
+        fields = {
+            'comment_date': ['gt'],
+            'comment_post': ['in'],
+            'comment_text': ['icontains'],  # мы хотим чтобы нам выводило имя хотя бы отдалённо похожее на то что запросил пользователь
+            'author_comment': ['in'],  # количество товаров должно быть больше или равно тому, что указал пользователь
+        }

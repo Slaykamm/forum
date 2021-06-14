@@ -10,27 +10,29 @@
 
                     <h2 class="section-heading">{{post.post_title}}</h2>
                     
-                        <p> {{ post.post_text }}</p>
+                        <p> {{ post.post_text|safe }}</p>
                         
                         <blockquote class="blockquote">Автор: {{ post.author_post }}, Дата: {{post.post_date|date:'d M Y'}}</blockquote>
  
-                        
+                                {% if author_flag %}
                         <div class="d-flex justify-content-end mb-4"> <a class="btn btn-primary text-uppercase" href="{% url 'post_update' post.id %}">Редактировать</a>
                             
                             '          ' <a class="btn btn-primary text-uppercase" href="{% url 'post_delete' post.id %}">Удалить</a>
                         </div>
+                                {% endif %}
 
-
+                                
                             {% if comments %}
                             <p><h3><strong>Комментарии: </strong></h3></p>
                                 
                             
                             {% for com in comments %}
                                     
-                            <p>      <h5>   {{ com.comment_text }} 
+                            <p>      <h5>   {{ com.comment_text }}   </h5> 
                                 <p> </p>
-                            </h5> <a href="{% url 'update_comment' com.id %}"><h7><u>Редактировать</h7> 
-                                                               <a href="{% url 'delete_comment' com.id %}">Удалить</u></a></p>
+                                
+                        <!--   <a href="{% url 'update_comment' com.id %}"><h7><u>Редактировать</h5> -->
+                            <!--                                      <a href="{% url 'delete_comment' com.id %}">Удалить</u></a></p> -->
                                     {% if com.comment_text %}
                                     
 

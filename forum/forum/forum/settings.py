@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
 
+    'ckeditor',
+
 ]
 
 MIDDLEWARE = [
@@ -155,9 +157,21 @@ LOGIN_REDIRECT_URL = '/'
 
 SITE_ID = 1
 
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = ("mandatory")
+DEFAULT_FROM_EMAIL = 'destpoch55@mail.ru'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+
+EMAIL_HOST = 'smtp.mail.ru' # адрес сервера Яндекс-почты для всех один и тот же
+EMAIL_PORT = 465 # порт smtp сервера тоже одинаковый
+EMAIL_HOST_USER = 'destpoch55' #'destpoch33' #'destpoch22' # ваше имя пользователя, например если ваша почта user@yandex.ru, то сюда надо писать user, иными словами, это всё то что идёт до собаки
+EMAIL_HOST_PASSWORD = '12345+qwe'  #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'qwerty123$' #'slaykam1111' # пароль от почты
+EMAIL_USE_SSL = True # Яндекс использует ssl, подробнее о том, что это, почитайте на Википедии, но включать его здесь обязательно
+SOCIALACCOUNT_EMAIL_VERIFICATION = ACCOUNT_EMAIL_VERIFICATION

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.deletion import CASCADE
+from ckeditor.fields import RichTextField
 
 
 
@@ -26,7 +27,8 @@ class Category(models.Model):
 class Post(models.Model):
     post_title = models.CharField(max_length = 64, default = "Your message")
     post_date = models.DateField(auto_now_add = True)
-    post_text = models.TextField(default='')
+    #post_text = models.TextField(default='')
+    post_text = RichTextField(blank = True, null = True)
     post_rating = models.IntegerField(default = 0)
 
     author_post = models.ForeignKey(Author, on_delete=models.CASCADE)
