@@ -8,7 +8,7 @@
         <hr class="my-4" />
             <div class="post-preview">
                 <form method="GET">
-                    {{ filter.form }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+                  {{ filter.form.as_p }}  <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
                     <input type="submit" value="Найти">
                 </form>
 
@@ -40,12 +40,15 @@
                         {% for com in filter.qs %} 
 
                                   
-                        </p>
+                    </p>
+ 
+
                       <td>
                             <p style="text-align: center;">{{ com.comment_date|date:'d M Y'}} </p>
                         </td>
                         <td>
-                            <p style="text-align: center;">{{ com.comment_post|truncatewords:4}} </p>
+                         
+                            <p style="text-align: center;"> <a href="{% url 'post_detail_from_comment' com.id %}"> {{ com.comment_post|truncatewords:4}}  </a> </p> 
                         </td>
                         <td>
                             <p style="text-align: center;">{{ com.comment_text|truncatewords:3}} </p>
@@ -55,7 +58,7 @@
                         </td>
                         <td>
                            <!-- <a href="{% url 'update_comment' com.id %}"><u>Редактировать  -->
-                            <a href="{% url 'feedback_comment' com.id %}"><u>Отклик / </a>  
+                            <p style="text-align: center;"> <a href="{% url 'feedback_comment' com.id %}"><u>Отклик / </a>  
                            <a href="{% url 'delete_comment' com.id %}"><u>Удалить</u></a></p>                               
                         </td>        
 

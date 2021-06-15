@@ -175,3 +175,11 @@ EMAIL_HOST_USER = 'destpoch55' #'destpoch33' #'destpoch22' # ваше имя п�
 EMAIL_HOST_PASSWORD = '12345+qwe'  #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'qwerty123$' #'slaykam1111' # пароль от почты
 EMAIL_USE_SSL = True # Яндекс использует ssl, подробнее о том, что это, почитайте на Википедии, но включать его здесь обязательно
 SOCIALACCOUNT_EMAIL_VERIFICATION = ACCOUNT_EMAIL_VERIFICATION
+
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

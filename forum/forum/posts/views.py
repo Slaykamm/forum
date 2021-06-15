@@ -9,38 +9,39 @@ from django.core.paginator import Paginator
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives # импортируем класс для создание объекта письма с html
+
+from django.views.generic.base import RedirectView
+from django.urls import reverse
+
+
+from .tasks import printer
 
   
  
 class PostsList(ListView):
     model = Post  # указываем модель, объекты которой мы будем выводить
     template_name = 'posts.html'  # указываем имя шаблона, в котором будет лежать HTML, 
-                                    #в котором будут все инструкции о том, как именно пользователю должны вывестись наши объекты
     context_object_name = 'posts'
     queryset = Post.objects.order_by('-post_date')
     paginate_by = 3 
-
 
     def get_context_data(self, **kwargs):  # забираем отфильтрованные объекты переопределяя метод get_context_data у наследуемого класса (привет, полиморфизм, мы скучали!!!)
         context = super().get_context_data(**kwargs)
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         #context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
 
-
+        printer.delay(10)
 
         if self.request.user.is_authenticated: 
             author = Author.objects.filter(author_user = self.request.user).exists() #делаем всех авторами, как просят в ТЗ
-
             if not author:
                 Author.objects.create(author_user=self.request.user)
-
-
-
         return context
+
 
 
 
@@ -152,28 +153,12 @@ class CommentUpdateView(UpdateView):
 
 
 
-
-
-
         
 @method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class CommentDeleteView(DeleteView):
     template_name = 'post_delete.html'
     queryset = Comment.objects.all()
     success_url = '/comment_list'
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -227,14 +212,16 @@ class CommentDetailView(ListView):
             post_comments = Comment.objects.filter(comment_post__author_post = Author.objects.get(author_user = self.request.user))
             for post in post_comments:
                 if len(str(post.comment_text)) == 0:
-                    print('AAAA', post.id )
                     empty = Comment.objects.get(id = post.id)
                     empty.delete()
 
             context['comments'] = post_comments  
             context['filter'] = CommentFilter(self.request.GET, queryset=post_comments)   #self.get_queryset()) 
+            context['post'] = Post.objects.all()
 
         return context
+
+
 
 @method_decorator(login_required(login_url = '/accounts/login/'), name='dispatch')
 class CommentFeedbackView(DetailView):
@@ -284,44 +271,23 @@ class CommentFeedbackView(DetailView):
 
         msg.attach_alternative(html_content, "text/html")
         
-        #print("вместо отправки извещения на изменение печатаем",  feedback_comment_author, feedback_comment_text, post_commented_title, post_id  )
-        msg.send() # отсылаем
+        print("вместо отправки извещения на изменение печатаем",  feedback_comment_author, feedback_comment_text, post_commented_title, post_id  )
+        #msg.send() # отсылаем
 
 
         return context
 
 
+#это мы делаем переадресацию чтобы кликал в однйо модели, брал аргумент и тащил в другую модель.
 
+class PostDetailFromComments(RedirectView):
 
-
-
-        # postCat = Post.objects.get(pk=id).post_category.all()
-        # usCat = Category.objects.filter(subscribers= User.objects.get(username=str(user)))
-
-
-        # for cat in postCat:
-        #     if not CategorySubscribers.objects.filter(category = cat, user = self.request.user).exists():   # делаем если подпиччика нет
-        #         CategorySubscribers.objects.create(category = cat, user = self.request.user )
-        #         forEmailCat = cat #получаем категорию, чтобы отправить юзеру по емаил
-        #         context['is_not_subscriber'] = False
-
-        #         html_content = render_to_string( 
-        #         'subscribe_created.html',
-        #         {
-        #         'user': user, 'cat': cat, 'title': emailtitle, 'text':emailarticle, 'art_id':id,
-        #         }
-
-        #         )
-        #         print ('asdas', id)
-        #         msg = EmailMultiAlternatives(
-        #         subject=f'{self.request.user} ',    #кому
-                
-        #         body=f'Вы подписались на категорию {forEmailCat}', 
-        #         from_email='destpoch44@mail.ru',
-        #         to=[f'{userEmail}', ]  
-        #         )
-
-        #         msg.attach_alternative(html_content, "text/html")
-        #         print("печатаем что отправили подписку", 'user', user, 'cat', cat, 'title', emailtitle, 'text',emailarticle, 'art_id',id)
-        #         #msg.send() # отсылаем
+    model = Post
+    template_name = 'post_detail.html'
+    context_object_name = 'post'
+    queryset = Post.objects.all()  
+    
+    def get_redirect_url(self, pk):
+        post_comments_id = Comment.objects.get(id = pk).comment_post.id 
+        return reverse('post_detail', args=(post_comments_id,))
 

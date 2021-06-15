@@ -15,6 +15,7 @@ class PostFilter(FilterSet):
         }
 
 
+
 class CommentFilter(FilterSet):
     class Meta:
         model = Comment
