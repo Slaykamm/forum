@@ -34,13 +34,13 @@ def notify_post_athour_comment(sender, instance,  **kwargs): #created,
             subject=f'Комментарий на Ваш пост ',   
                     
             body=f'Комментарий на Ваш пост', 
-            from_email= 'destpoch55@mail.ru', #'destpoch22@mail.ru',  #'destpoch22@mail.ru'
+            from_email= 'destpoch77@mail.ru', #'destpoch22@mail.ru',  #'destpoch22@mail.ru'
             to=  emails_list
             )
 
             msg.attach_alternative(html_content, "text/html")
-            print("вместо отправки извещения на изменение печатаем",  'post_author', post_author, 'post_comments_author', instance.author_comment, 'post_title', post_title, 'ID', post_comments_id )
-            #msg.send() # отсылаем
+            #print("вместо отправки извещения на изменение печатаем",  'post_author', post_author, 'post_comments_author', instance.author_comment, 'post_title', post_title, 'ID', post_comments_id )
+            msg.send() # отсылаем
 
 
 

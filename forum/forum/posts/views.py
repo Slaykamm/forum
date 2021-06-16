@@ -18,7 +18,7 @@ from django.views.generic.base import RedirectView
 from django.urls import reverse
 
 
-from .tasks import printer
+from .tasks import weeklyUpdates
 
   
  
@@ -34,7 +34,7 @@ class PostsList(ListView):
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         #context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
 
-        printer.delay(10)
+        weeklyUpdates()
 
         if self.request.user.is_authenticated: 
             author = Author.objects.filter(author_user = self.request.user).exists() #делаем всех авторами, как просят в ТЗ
@@ -119,11 +119,14 @@ class CommentCreateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        id = self.kwargs.get('pk')
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         return context
 
 
     def get_object(self, **kwargs):
+        
+        id = self.kwargs.get('pk')
 
         return Comment.objects.create(comment_post = Post.objects.get(id = id), author_comment = Author.objects.get(author_user = self.request.user))
 
@@ -265,14 +268,14 @@ class CommentFeedbackView(DetailView):
         subject=f'Благодарим за комментарий ',   
         
         body=f'Благодарим за комментарий ', 
-        from_email= 'destpoch55@mail.ru', #'destpoch22@mail.ru',  #'destpoch22@mail.ru'
+        from_email= 'destpoch77@mail.ru', #'destpoch22@mail.ru',  #'destpoch22@mail.ru'
         to=  emails_list
         )
 
         msg.attach_alternative(html_content, "text/html")
         
         print("вместо отправки извещения на изменение печатаем",  feedback_comment_author, feedback_comment_text, post_commented_title, post_id  )
-        #msg.send() # отсылаем
+        msg.send() # отсылаем
 
 
         return context

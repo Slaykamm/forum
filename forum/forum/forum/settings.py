@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     'ckeditor',
+    'bootstrapform',
 
 ]
 
@@ -165,13 +166,13 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = ("mandatory")
-DEFAULT_FROM_EMAIL = 'destpoch55@mail.ru'
+DEFAULT_FROM_EMAIL = 'destpoch77@mail.ru'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 
 EMAIL_HOST = 'smtp.mail.ru' # адрес сервера Яндекс-почты для всех один и тот же
 EMAIL_PORT = 465 # порт smtp сервера тоже одинаковый
-EMAIL_HOST_USER = 'destpoch55' #'destpoch33' #'destpoch22' # ваше имя пользователя, например если ваша почта user@yandex.ru, то сюда надо писать user, иными словами, это всё то что идёт до собаки
+EMAIL_HOST_USER = 'destpoch77' #'destpoch33' #'destpoch22' # ваше имя пользователя, например если ваша почта user@yandex.ru, то сюда надо писать user, иными словами, это всё то что идёт до собаки
 EMAIL_HOST_PASSWORD = '12345+qwe'  #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'IgYtpPaUr43-' #'IrIpyPr*oS31' #'qwerty123$' #'slaykam1111' # пароль от почты
 EMAIL_USE_SSL = True # Яндекс использует ssl, подробнее о том, что это, почитайте на Википедии, но включать его здесь обязательно
 SOCIALACCOUNT_EMAIL_VERIFICATION = ACCOUNT_EMAIL_VERIFICATION
@@ -183,3 +184,4 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_IMPORTS = ["posts.tasks"]

@@ -1,11 +1,15 @@
 {% extends 'default.html' %}
 {% load static %}
-
+{% load bootstrap %}
 {% block content %}
 
+
 <form method="GET">
-    {{ filter.form| safe }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
-    <input type="submit" value="Найти">
+
+    {{ filter.form|bootstrap   }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+    <br>
+    <button type = "submit" class="btn btn-primary">Найти</button>
+    
 </form>
 
                     {% for post in filter.qs %}

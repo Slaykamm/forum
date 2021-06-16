@@ -1,6 +1,6 @@
 {% extends 'default.html' %}
 {% load static %}
-
+{% load bootstrap %}
 {% block content %}
 {% if filter.qs %}
 
@@ -8,8 +8,9 @@
         <hr class="my-4" />
             <div class="post-preview">
                 <form method="GET">
-                  {{ filter.form.as_p }}  <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
-                    <input type="submit" value="Найти">
+                    {{ filter.form|bootstrap  }} <!-- Форму от фильтров за нас сделает django. А вот кнопку, увы придётся делать самому -->
+                    <br>
+                    <button type = "submit" class="btn btn-primary">Найти</button>
                 </form>
 
                    
