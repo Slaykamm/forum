@@ -18,7 +18,7 @@ from django.views.generic.base import RedirectView
 from django.urls import reverse
 
 
-from .tasks import weeklyUpdates
+#from .tasks import weeklyUpdates
 
   
  
@@ -34,7 +34,7 @@ class PostsList(ListView):
         context['logged_user'] = self.request.user.username  # это, чтобы в шаблоне показывать вместо логина имя залогиненного
         #context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())  # вписываем наш фильтр в контекст
 
-        weeklyUpdates()
+#        weeklyUpdates()
 
         if self.request.user.is_authenticated: 
             author = Author.objects.filter(author_user = self.request.user).exists() #делаем всех авторами, как просят в ТЗ
@@ -79,9 +79,21 @@ class PostCreateView(CreateView):
 
         return context
 
-    def get_object(self, **kwargs):
+    # Функция для кастомной валидации полей формы модели
+    def form_valid(self, form):
+        # создаем форму, но не отправляем его в БД, пока просто держим в памяти
+        fields = form.save(commit=False)
+        # Через реквест передаем недостающую форму, которая обязательна
+        fields.author_post = Author.objects.get(author_user=self.request.user)
+        print("Защибися!")
+        # Наконец сохраняем в БД
+        fields.save()
+        return super().form_valid(form)
 
-        return    Post.objects.create(author_post =  Author.objects.get(author_user = self.request.user))
+
+
+#    def get_object(self, **kwargs):
+#        return    Post.objects.create(author_post =  Author.objects.get(author_user = self.request.user))
 
  
 
@@ -275,7 +287,7 @@ class CommentFeedbackView(DetailView):
         msg.attach_alternative(html_content, "text/html")
         
         print("вместо отправки извещения на изменение печатаем",  feedback_comment_author, feedback_comment_text, post_commented_title, post_id  )
-        msg.send() # отсылаем
+#        msg.send() # отсылаем
 
 
         return context

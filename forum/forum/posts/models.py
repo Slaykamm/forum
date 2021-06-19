@@ -20,10 +20,6 @@ class Category(models.Model):
         return f'{self.title_category}'
 
 
-
-
-
-
 class Post(models.Model):
     post_title = models.CharField(max_length = 64, default = "Your message")
     post_date = models.DateField(auto_now_add = True)
@@ -42,7 +38,7 @@ class Post(models.Model):
 
 
 
-    def get_absolute_url(self): # добавим абсолютный путь чтобы после создания нас перебрасывало на страницу с товаром
+    def get_absolute_url(self): 
         return f'/posts/{self.id}' 
 
 
@@ -57,7 +53,8 @@ class Comment(models.Model):
     def __str__(self):
         return f'{self.comment_text}'
 
-    def get_absolute_url(self): # добавим абсолютный путь чтобы после создания нас перебрасывало на страницу с товаром
-        return f'/posts/' 
+    def get_absolute_url(self): 
+        return f'/posts/{self.comment_post_id}'
+
 
 

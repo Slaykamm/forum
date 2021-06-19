@@ -3,11 +3,11 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives # импортируем класс для создание объекта письма с html
 from django.template.loader import render_to_string
 from .models import Post, Comment, User
-from django.db.models.signals import post_save
+#from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-@receiver(post_save, sender=Comment)  #
+#@receiver(post_save, sender=Comment)  #
 
 def notify_post_athour_comment(sender, instance,  **kwargs): #created,
     id = instance.id   # получаем ID побуликованной сообщения
@@ -39,8 +39,8 @@ def notify_post_athour_comment(sender, instance,  **kwargs): #created,
             )
 
             msg.attach_alternative(html_content, "text/html")
-            #print("вместо отправки извещения на изменение печатаем",  'post_author', post_author, 'post_comments_author', instance.author_comment, 'post_title', post_title, 'ID', post_comments_id )
-            msg.send() # отсылаем
+            print("вместо отправки извещения на изменение печатаем",  'post_author', post_author, 'post_comments_author', instance.author_comment, 'post_title', post_title, 'ID', post_comments_id )
+            #msg.send() # отсылаем
 
 
 

@@ -44,8 +44,8 @@ def weeklyUpdates():
             )
 
             msg.attach_alternative(html_content, "text/html")
-            #print("Вместо отправки еженедельной подписки печатаем", 'user', userinfo, 'art_id',freshPostsIds)
-            msg.send() # отсылаем
+            print("Вместо отправки еженедельной подписки печатаем", 'user', userinfo, 'art_id',freshPostsIds)
+#            msg.send() # отсылаем
 
 
 
